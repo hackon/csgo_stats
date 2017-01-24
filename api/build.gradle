@@ -1,0 +1,22 @@
+plugins {
+  id 'com.github.johnrengelman.shadow' version '1.2.4'
+}
+
+apply from: "$rootDir/gradle/dependencies.gradle"
+apply plugin:'java'
+
+archivesBaseName = 'csgo_stats_api'
+
+jar {
+  manifest {
+    attributes(
+        'Main-Class': 'com.hackon.csgostats.api.Server'
+    )
+  }
+}
+
+dependencies {
+
+  compile 'com.sparkjava:spark-core:2.3'
+//  compile 'com.squareup.okhttp3:okhttp:3.5.0'
+}
