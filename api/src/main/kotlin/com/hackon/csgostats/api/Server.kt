@@ -1,7 +1,9 @@
 package com.hackon.csgostats.api
 
 import com.google.gson.GsonBuilder
-import spark.Spark
+import com.google.gson.TypeAdapter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 import spark.Spark.*
 import java.time.Instant
 
@@ -17,8 +19,13 @@ class Server{
 
 fun main(args: Array<String>) {
   val gson = GsonBuilder()
+      .registerTypeAdapter(Instant::class.java, object :TypeAdapter<Instant>(){
+        override fun write(out: JsonWriter, value: Instant?) {out.value(value?.epochSecond)}
+        override fun read(`in`: JsonReader) = Instant.ofEpochSecond(`in`.nextLong())
+      })
+      .serializeNulls()
       .create()
-  Spark.port(3000)
+  port(3000)
   ipAddress("127.0.0.1")
   post("/") {
     req,res->
@@ -28,17 +35,16 @@ fun main(args: Array<String>) {
 }
 
 data class Data(
-    val provider:Provider,
-    val map:CSMap,
-    val round:Round,
-    val player:CSPlayer,
-    val previously:CSPlayer?=null
+    val provider:Provider?=null,
+    val map:CSMap?=null,
+    val round:Round?=null,
+    val player:CSPlayer?=null
 )
 
 data class Round (
-    val phase: String,
-    val win_team:String?= null,
-    val bomb:String
+    val phase: String = "",
+    val win_team:String= "",
+    val bomb:String = ""
 )
 
 data class CSPlayer(
@@ -69,7 +75,7 @@ data class PlayerWeapons (
 
 data class PlayerWeapon(
     val name: String,
-    val paintkit:String,
+    val paintkit:String="",
     val type:String,
     val state:String,
     val ammo_clip:Int?=null,
@@ -80,7 +86,7 @@ data class PlayerWeapon(
 data class PlayerState (
     val health:Int,
     val armor:Int,
-    val helmet:Boolean,
+    val helmet:Boolean = false,
     val flashed:Int,
     val smoked:Int,
     val burning:Int,
@@ -90,7 +96,7 @@ data class PlayerState (
 )
 
 data class CSMap(
-    val mode:String,
+//    val mode:String,
     val name:String,
     val phase:String,
     val round:Int,
@@ -105,5 +111,5 @@ data class Provider (
     val appid:Int,
     val version:Int,
     val steamid:String,
-    val timestamp:Long
+    val timestamp:Instant
 )
